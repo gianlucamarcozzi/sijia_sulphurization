@@ -1,11 +1,11 @@
-function [idx, x, y] = maskSpectrum(x, y, Range)
-% Return values of the spectrum that are in Range.
+function [idxArray, x, y] = maskspectrum(x, y, range)
+% maskspectrum      Return values of the spectrum that are in range.
 %
-% [idx, x, y] = maskSpectrum(x, y, Range)
+% [idx, x, y] = maskspectrum(x, y, range)
 % Input:
 %   x           vector of length N
 %   y           spectrum, vector of length N
-%   Range       segments of the spectrum to return as output (expressed
+%   range       segments of the spectrum to return as output (expressed
 %               in the units of x),
 %               double (Mx2): [x11 x12; x21 x22; ...]
 %
@@ -14,15 +14,15 @@ function [idx, x, y] = maskSpectrum(x, y, Range)
 %   x           masked x
 %   y           masked y
 
-[M, ~] = size(Range);
-idx = zeros(size(x));
-for iM = 1:M
-    idx_ = (x >= Range(iM, 1)) & (x <= Range(iM, 2));
-    idx = idx + idx_;
+[nRanges, ~] = size(range);
+idxArray = zeros(size(x));
+for iRange = 1:nRanges
+    idxArray_ = (x >= range(iRange, 1)) & (x <= range(iRange, 2));
+    idxArray = idxArray + idxArray_;
 end
-idx = logical(idx);
+idxArray = logical(idxArray);
 
-x = x(idx);
-y = y(idx);
+x = x(idxArray);
+y = y(idxArray);
 
 end
