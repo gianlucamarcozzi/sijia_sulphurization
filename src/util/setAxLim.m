@@ -1,4 +1,4 @@
-function outRange = setAxLim(x, Ratio)
+function outRange = setaxlim(x, ratio)
 % Return a range that is perc times bigger than the range between the 
 % maximum and the minimum of x. Useful to set limits for both axes of a
 % plot.
@@ -11,8 +11,8 @@ function outRange = setAxLim(x, Ratio)
 %   outRange    new range to give as input to xlim or ylim
 
 ppAmp = max(x) - min(x);
-RangeMin = min(x) - ppAmp*Ratio;
-RangeMax = max(x) + ppAmp*Ratio;
-outRange = [RangeMin RangeMax];
+rangeMin = min(x) - ppAmp*ratio;
+rangeMax = max(x) + ppAmp*ratio;
+outRange = [rangeMin rangeMax];
 
 end

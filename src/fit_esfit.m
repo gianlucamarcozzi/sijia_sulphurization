@@ -1,68 +1,76 @@
-%% Fit
-clearvars; close all
+clearvars, clc
 % Path to the project folder
 chdir('D:\Profile\qse\files\projects\sijia_sulphurization');
-% Add source file directory
-addpath(genpath('scr'));
 
-for jj = 49:50
-    pathFile = strcat("data/processed/gm-e1-000", string(jj), ".mat");
-    load(pathFile);
-    
-    % Fit 2 spin systems
-    Sys0 = struct('g', 2.0034, ...
-        'lwpp', [1 0.2]);
-    Sys1 = struct('g', 2.0052, ...
-        'lwpp', [1 0.5], ...
-        'weight', 1.2);
-    Sys2 = struct('g', 2.008, ...
-        'lwpp', [0.6 0.6], ...
-        'weight', 0.7);
-    
-    
-    Vary0 = struct('g', .005, ...
-        'lwpp', Sys0.lwpp);
-    Vary1 = struct('g', .005, ...
-        'lwpp', Sys1.lwpp, ...
-        'weight', 1);
-    Vary2 = struct('g', .005, ...
-        'lwpp', Sys2.lwpp, ...
-        'weight', 1);
-    
-    % Define x and y
-    Exp.Range = [min(data.x) max(data.x)];
-    Exp.mwFreq = data.Params.MWFQ*1e-9;
-    Exp.nPoints = numel(data.x);
-    Exp.Harmonic = 0;
+jj = 23;
+pathFile = strcat("data/processed/gm-e1-000", string(jj), ".mat");
+load(pathFile);
 
-    % Disregard low field peak g ~ 2.0065
-    % FitOpt.mask = (1:numel(x) < 195) | (1:numel(x) > 378);
-    FitOpt.BaseLine = [];
-    
-    Sys = {Sys0, Sys1, Sys2};
-    SysVary = {Vary0, Vary1, Vary2};
-    % Sys = {Sys0, Sys1};
-    % SysVary = {Vary0, Vary1};
-    % Sys = {Sys0};
-    % SysVary = {Vary0};
-    
-    % Fit = esfit(yy, @pepper, {{Sys1, Sys2, Sys3}, Exp}, {{Vary1, Vary2, Vary3}}, FitOpt)
-    % data.Fit = esfit(data.y, @pepper, {Sys, Exp}, {SysVary}, FitOpt);
-        
-    [data.Fit.yFit, data.Fit.SysBest] = simulatecomponentsfit(data.Fit);
+% Fit 
+Sys0 = struct('g', 2.0041, ...
+    'lwpp', [0.1 0.1]);
+Sys1 = struct('g', 2.0043, ...
+    'lwpp', [0.1 0.1], ...
+    'weight', 1);
+Sys2 = struct('g', 2.0066, ...
+    'lwpp', [1 0.1], ...
+    'weight', 0.9);
+Sys3 = struct('g', 2.0135, ...
+    'lwpp', [0.4 0.03], ...
+    'weight', 0.015);
 
-    figure()
-    plot(data.x, data.y)
-    hold on
-    plot(data.x, data.Fit.fit)
-    for isys = 1:numel(data.Fit.yFit(:, 1))
-        yFit_ = data.Fit.yFit(isys, :);
-        plot(data.x, yFit_)
-    end
 
-    saveintomat(pathFile, data, true)
-    % fprintf('%f +- %e\n', data.Fit.pfit(1), data.Fit.pstd(1))
+Vary0 = struct('g', .005, ...
+    'lwpp', [0.08 0.08]);
+Vary1 = struct('g', .005, ...
+    'lwpp', [0.08 0.08], ...
+    'weight', 1);
+Vary2 = struct('g', .005, ...
+    'lwpp', [0.9 0.08], ...
+    'weight', 1);
+Vary3 = struct('g', .005, ...
+    'lwpp', [0.38 0.01], ...
+    'weight', 1);
+
+% Define x and y
+Exp.Range = [min(data.x) max(data.x)];
+Exp.mwFreq = data.Params.MWFQ*1e-9;
+Exp.nPoints = numel(data.x);
+Exp.Harmonic = 1;
+
+% Disregard low field peak g ~ 2.0065
+% FitOpt.mask = (1:numel(x) < 195) | (1:numel(x) > 378);
+FitOpt.BaseLine = [];
+
+% Sys = {Sys0, Sys1, Sys2};
+% SysVary = {Vary0, Vary1, Vary2};
+Sys = {Sys0, Sys1, Sys2, Sys3};
+SysVary = {Vary0, Vary1, Vary2, Vary3};
+% Sys = {Sys0};
+% SysVary = {Vary0};
+
+% Fit = esfit(yy, @pepper, {{Sys1, Sys2, Sys3}, Exp}, {{Vary1, Vary2, Vary3}}, FitOpt)
+data.Fit = esfit(data.y, @pepper, {Sys, Exp}, {SysVary}, FitOpt);
+% saveintomat(pathFile, data, false)
+
+%%
+jj = 23;
+pathFile = strcat("data/processed/gm-e1-000", string(jj), ".mat");
+load(pathFile);
+[data.Fit.yFit, data.Fit.SysBest] = simulatecomponentsfit(data.Fit);
+
+figure()
+plot(data.x, data.y)
+hold on
+plot(data.x, data.Fit.fit)
+for isys = 1:numel(data.Fit.yFit(:, 1))
+    yFit_ = data.Fit.yFit(isys, :);
+    plot(data.x, yFit_)
 end
+
+% saveintomat(pathFile, data, true)
+% fprintf('%f +- %e\n', data.Fit.pfit(1), data.Fit.pstd(1))
+% end
 
 %% Calculate weights
 %{

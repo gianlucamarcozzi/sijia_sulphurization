@@ -176,7 +176,7 @@ classdef ScrollableAxes < matlab.mixin.SetGet
 			
 			% Create plot.
 			h = feval(functionName, obj.Parent, x, z(obj.Index, :), args{:});
-			
+
 			% Set axis limits.
 			if obj.AutoLimits
 				setAxisLimits(obj, x, z)
@@ -226,6 +226,7 @@ classdef ScrollableAxes < matlab.mixin.SetGet
 			% Update plot data.
 			for iPlot = 1:numel(obj.Plots)
 				h = obj.Plots(iPlot);
+                h.Parent.Title.String = sprintf('%d', obj.Index);
 				z = obj.ZData{iPlot}(obj.Index, :);
 				if all(isnan(z))
 					set(h, 'Visible', 'off');
@@ -233,9 +234,9 @@ classdef ScrollableAxes < matlab.mixin.SetGet
 					set(h, 'YData', z);
 					set(h, 'Visible', 'on');
 				end
-			end
+            end
 			drawnow;
-			
+
 			% Update all markers.
 			for iMarker = 1:numel(obj.XMarkers)
 				set(obj.XMarkers(iMarker), ...
