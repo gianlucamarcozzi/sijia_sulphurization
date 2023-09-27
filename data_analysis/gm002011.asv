@@ -1,0 +1,38 @@
+clearvars, clc
+cd('D:\Profile\qse\files\projects\sijia_sulphurization')
+
+pathLoad = 'data/raw/gm002011.DTA';
+
+[data.x, data.DataPrep.yRaw, data.Params] = eprload(pathLoad);
+
+pathLoad = 'data/raw/gm002011.DTA';
+
+[data.Ringdown.x, yRingdown, data.ParamsRingdown] = eprload(pathLoad);
+data.y = real(yRaw);
+
+%% Add metadata
+data.Metadata = struct( ...
+    'sample', ...
+    'SCOF mixed with PVDF, super P, LiTF SI. Discharged to 2.4 volt', ...
+    'sample_ID', 'SCOF010', ...
+    'sample_provided_by', 'Sijia Cao', ...
+    'sample_provided_on', '2023-09-15', ...
+    'spectrometer', 'HZB E580', ...
+    'resonator', 'MD5 resonator', ...
+    'teslameter_status', 'ON');
+
+%%
+
+expoModelGeneral = @(tt, p) p(1)*exp(-tt/p(2)) + p(3);
+expoModel = @(p) expoModelGeneral(data.x, p);
+p0 = [5e6, 700, 0];
+vary = [2e6, 300, 2e6];
+FitOpt.x = data.x;
+
+Fit = esfit(data.y, expoModel, p0, vary, FitOpt);
+
+
+%% Save into mat
+[~, fileName, fileExt] = fileparts(pathLoad);
+pathSave = fullfile("data/processed", strcat(fileName, '.mat'));
+saveintomat(pathSave, data, false)
