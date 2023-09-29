@@ -1,14 +1,13 @@
-%% DATA PREPARATION
-% Inizialize script
 clearvars, close all
 cd('D:\Profile\qse\files\projects\sijia_sulphurization')
-addpath(genpath('scr'))
-%%
-for jj = 42
-    pathLoad = strcat("data/processed/gm-e1-000", string(jj), ".mat");
+
+fileNo = ["09", "10"];
+for jjNo = 1:2 %numel(fileNo)
+    jj = fileNo(jjNo);
+    pathLoad = strcat("data/processed/gm0020", string(jj), ".mat");
     load(pathLoad);
     
-    filePath = strcat('temp/temp_gm-e1-000', string(jj), '.txt');   
+    filePath = strcat('temp/temp_gm0020', string(jj), '.txt');   
     printFieldArray = ["g", "lwpp", "lwpp", "weight", "weightDI"];
     printFieldArrayAs = ["g", "lwppG", "lwppL", "weight", "weightDI"];
     matlab2latextablefit(filePath, data.Fit, ...

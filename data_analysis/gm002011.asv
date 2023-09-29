@@ -5,10 +5,20 @@ pathLoad = 'data/raw/gm002011.DTA';
 
 [data.x, data.DataPrep.yRaw, data.Params] = eprload(pathLoad);
 
-pathLoad = 'data/raw/gm002011.DTA';
+pathLoad = 'data/raw/gm002015.DTA';
 
-[data.Ringdown.x, yRingdown, data.ParamsRingdown] = eprload(pathLoad);
-data.y = real(yRaw);
+[data.DataPrep.OffResonance.x, data.DataPrep.OffResonance.y, ...
+    data.data.DataPrep.OffResonance.Params] = eprload(pathLoad);
+
+data.y = data.DataPrep.yRaw - data.DataPrep.OffResonance.y;
+
+clf
+plot(data.x, real(data.DataPrep.yRaw), data.x, imag(data.DataPrep.yRaw))
+hold on
+plot(data.x, real(data.DataPrep.OffResonance.y), ...
+    data.x, imag(data.DataPrep.OffResonance.y))
+plot(data.x, real(data.y), data.x, imag(data.y))
+legend('raw', 'raw', 'ring', 'ring', 'diff', 'diff')
 
 %% Add metadata
 data.Metadata = struct( ...
@@ -26,13 +36,57 @@ data.Metadata = struct( ...
 expoModelGeneral = @(tt, p) p(1)*exp(-tt/p(2)) + p(3);
 expoModel = @(p) expoModelGeneral(data.x, p);
 p0 = [5e6, 700, 0];
-vary = [2e6, 300, 2e6];
+vary = [2e6, 500, 2e6];
 FitOpt.x = data.x;
 
-Fit = esfit(data.y, expoModel, p0, vary, FitOpt);
+yDatas{1} = real(data.DataPrep.yRaw);
+yDatas{2} = imag(data.DataPrep.yRaw);
+yDatas{3} = real(data.y);
+yDatas{4} = imag(data.y);
+
+yDataDescriptions = {'real(data.DataPrep.yRaw)", ...
+    "imag(data.DataPrep.yRaw)", "real(data.y)", "imag(data.y)"];
+for iFit = 1:numel(yDatas)
+    Fit{iFit} = esfit(yDatas{iFit}, expoModel, p0, vary, FitOpt);
+    Fit.yDataDescription = yDataDescriptions(iFit);
+end
+
+data.Fit = Fit;
+%%
+
+clf
+load("plotColors.mat")
+plot(data.x, yDatas{3}, 'Color', plotColors(1), ...
+    'DisplayName', 'Exp. data real')
+hold on
+plot(data.x, Fit{3}.fit, 'Color', plotColors(2), 'HandleVisibility', 'off')
+plot(data.x, yDatas{4}, 'Color', plotColors(3), ...
+    'DisplayName', 'Exp. data imag')
+plot(data.x, Fit{4}.fit, 'Color', plotColors(2), 'HandleVisibility', 'off')
+plot(data.x, yDatas{1}, 'Color', plotColors(4), ...
+    'DisplayName', 'Subtracted real')
+plot(data.x, Fit{1}.fit, 'Color', plotColors(2), 'HandleVisibility', 'off')
+plot(data.x, yDatas{2}, 'Color', plotColors(5), ...
+    'DisplayName', 'Subtracted imag')
+plot(data.x, Fit{2}.fit, 'Color', plotColors(2), 'DisplayName', 'Fit')
+plot(data.x, real(data.DataPrep.OffResonance.y), 'LineStyle', '-', ...
+    'Color', plotColors(end), 'DisplayName', 'Off resonance real')
+plot(data.x, imag(data.DataPrep.OffResonance.y), 'LineStyle', '--', ...
+    'Color', plotColors(end), 'DisplayName', 'Off resonance imag')
+
+% xlim(setaxlim(meas{1}.gAx, -0.3))
+% ylim(setaxlim(meas{1}.y(:, 25), 0.05))
+% set(gca, 'Xdir', 'reverse')
+labelaxesfig(gca, 'Time / ns', 'Hanh Echo / A.U.')
+legend()
+% savefigas(gcf, 'figures/scof010_scof011_power_saturation_05.svg')
+
+%%
+
 
 
 %% Save into mat
+
 [~, fileName, fileExt] = fileparts(pathLoad);
 pathSave = fullfile("data/processed", strcat(fileName, '.mat'));
 saveintomat(pathSave, data, false)

@@ -10,6 +10,42 @@ end
 
 %%
 
+for jj = 1:numel(meas)
+    meas{jj}.gAx = planck*meas{jj}.Params.MWFQ/bmagn./meas{jj}.x*1000;
+end
+
+clf
+load("plotColors.mat")
+plot(meas{1}.gAx, meas{1}.y(:, 25), 'Color', plotColors(1))
+hold on
+plot(meas{1}.gAx, meas{1}.Fit{25}.fit, 'Color', plotColors(2))
+plot(meas{1}.gAx, meas{1}.Fit{25}.yFit(1, :), 'Color', plotColors(3))
+plot(meas{1}.gAx, meas{1}.Fit{25}.yFit(2, :), 'Color', plotColors(4))
+xlim(setaxlim(meas{1}.gAx, -0.3))
+ylim(setaxlim(meas{1}.y(:, 25), 0.05))
+set(gca, 'Xdir', 'reverse')
+labelaxesfig(gca, 'g-value', 'EPR signal / A.U.')
+legend('Exp. data', 'Fit', 'Sys 1', 'Sys 2')
+savefigas(gcf, 'figures/scof010_scof011_power_saturation_05.svg')
+
+%%
+
+clf
+load("plotColors.mat")
+plot(meas{2}.gAx, meas{2}.y(:, 25), 'Color', plotColors(1))
+hold on
+plot(meas{2}.gAx, meas{2}.Fit{25}.fit, 'Color', plotColors(2))
+plot(meas{2}.gAx, meas{2}.Fit{25}.yFit(1, :), 'Color', plotColors(3))
+plot(meas{2}.gAx, meas{2}.Fit{25}.yFit(2, :), 'Color', plotColors(4))
+xlim(setaxlim(meas{1}.gAx, -0.3))
+ylim(setaxlim(meas{2}.y(:, 25), 0.05))
+set(gca, 'Xdir', 'reverse')
+labelaxesfig(gca, 'g-value', 'EPR signal / A.U.')
+legend('Exp. data', 'Fit', 'Sys 1', 'Sys 2')
+savefigas(gcf, 'figures/scof010_scof011_power_saturation_06.svg')
+
+%%
+
 clf
 for ii = 1:numel(meas{1}.Fit)
     g11(ii) = meas{1}.Fit{ii}.pfit(1);
@@ -20,16 +56,16 @@ for ii = 1:numel(meas{2}.Fit)
     g22(ii) = meas{2}.Fit{ii}.pfit(3);
 end
 load("plotColors.mat")
-plot(0:60, g11, 'o-', 'Color', plotColors(1))
+plot(0:60, g11 - 2, 'o-', 'Color', plotColors(1))
 hold on
-plot(0:60, g12, 'x-', 'Color', plotColors(1))
-plot(0:60, g21, 'o-', 'Color', plotColors(2))
-plot(0:60, g22, 'x-', 'Color', plotColors(2))
-xlim(setaxlim(0:60, 0.01))
-ylim([2.0024, 2.0051])
-labelaxesfig(gca, 'Microwave attenuation / dB', 'g-value')
-legend('SCOF010 Sys1', 'SCOF010 Sys2', 'SCOF011 Sys1', 'SCOF011 Sys2', ...
-    'Location', 'northwest')
+plot(0:60, g12 - 2, 'x-', 'Color', plotColors(1))
+plot(0:60, g21 - 2, 'o-', 'Color', plotColors(2))
+plot(0:60, g22 - 2, 'x-', 'Color', plotColors(2))
+xlim([-1, 61])
+ylim([2.0024, 2.0051] - 2)
+labelaxesfig(gca, 'Microwave attenuation / dB', 'g-value – 2')
+% legend('SCOF010 Sys1', 'SCOF010 Sys2', 'SCOF011 Sys1', 'SCOF011 Sys2', ...
+%     'Location', 'northwest')
 savefigas(gcf, 'figures/scof010_scof011_power_saturation_01.svg')
 
 %%

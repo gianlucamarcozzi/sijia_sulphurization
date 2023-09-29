@@ -16,6 +16,7 @@ for jj = 1:numel(pathFile)
     meas{jj}.Params.QValue
 end
 
+
 %%
 load("plotColors.mat")
 
@@ -51,4 +52,4 @@ xlim([1.99 2.02])
 legend({'Data', 'Fit', 'Sys 1', 'Sys2'})
 labelaxesfig(tL, 'g-value', 'EPR signal / A.U.')
 
-savefigas(gcf, 'figures/gvalue_mismatch_cw_pulse_md5_01.svg')
+% savefigas(gcf, 'figures/gvalue_mismatch_cw_pulse_md5_01.svg')

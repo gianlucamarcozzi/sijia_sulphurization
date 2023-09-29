@@ -1,22 +1,20 @@
 clearvars, clc
 cd('D:\Profile\qse\files\projects\sijia_sulphurization')
 
-pathLoad = 'data/raw/gm002011.DTA';
+pathLoad = 'data/raw/gm002015.DTA'; % off resonance
+[data.DataPrep.OffResonance.x, data.DataPrep.OffResonance.y, ...
+    data.data.DataPrep.OffResonance.Params] = eprload(pathLoad);
 
+pathLoad = 'data/raw/gm002011.DTA'; % on resonance
 [data.x, data.DataPrep.yRaw, data.Params] = eprload(pathLoad);
 
-pathLoad = 'data/raw/gm002015.DTA';
-
-[data.DataPrep.Ringdown.x, data.DataPrep.Ringdown.y, ...
-    data.data.DataPrep.Ringdown.Params] = eprload(pathLoad);
-
-data.y = data.DataPrep.yRaw - data.DataPrep.Ringdown.y;
+data.y = data.DataPrep.yRaw - data.DataPrep.OffResonance.y;
 
 clf
 plot(data.x, real(data.DataPrep.yRaw), data.x, imag(data.DataPrep.yRaw))
 hold on
-plot(data.x, real(data.DataPrep.Ringdown.y), ...
-    data.x, imag(data.DataPrep.Ringdown.y))
+plot(data.x, real(data.DataPrep.OffResonance.y), ...
+    data.x, imag(data.DataPrep.OffResonance.y))
 plot(data.x, real(data.y), data.x, imag(data.y))
 legend('raw', 'raw', 'ring', 'ring', 'diff', 'diff')
 
@@ -39,12 +37,19 @@ p0 = [5e6, 700, 0];
 vary = [2e6, 500, 2e6];
 FitOpt.x = data.x;
 
-yData = real(data.y);
-% Fit = 
-esfit(yData, expoModel, p0, vary, FitOpt);
+yDatas{1} = real(data.DataPrep.yRaw);
+yDatas{2} = imag(data.DataPrep.yRaw);
+yDatas{3} = real(data.y);
+yDatas{4} = imag(data.y);
 
+yDataDescriptions = {'real(data.DataPrep.yRaw)', ...
+    'imag(data.DataPrep.yRaw)', 'real(data.y)', 'imag(data.y)'};
+for iFit = 1:numel(yDatas)
+    Fit{iFit} = esfit(yDatas{iFit}, expoModel, p0, vary, FitOpt);
+    Fit{iFit}.yDataDescription = yDataDescriptions{iFit};
+end
 
-%% Save into mat
+data.Fit = Fit;
 
 [~, fileName, fileExt] = fileparts(pathLoad);
 pathSave = fullfile("data/processed", strcat(fileName, '.mat'));
